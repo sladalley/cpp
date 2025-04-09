@@ -23,6 +23,7 @@ Contributors:
 #ifndef DQ_COOPERATIVEDUALTASKSPACE_H
 #define DQ_COOPERATIVEDUALTASKSPACE_H
 
+#include <memory>
 #include<dqrobotics/DQ.h>
 #include<dqrobotics/robot_modeling/DQ_Kinematics.h>
 
@@ -31,15 +32,22 @@ namespace DQ_robotics
 
 class DQ_CooperativeDualTaskSpace
 {
-private:
+protected:
     DQ_Kinematics* robot1_;
     DQ_Kinematics* robot2_;
+
+    std::shared_ptr<DQ_Kinematics> robot1_sptr_;
+    std::shared_ptr<DQ_Kinematics> robot2_sptr_;
+
+    DQ_Kinematics* _get_robot1_ptr();
+    DQ_Kinematics* _get_robot2_ptr();
 
 public:
     //Remove default constructor
     DQ_CooperativeDualTaskSpace()=delete;
 
     DQ_CooperativeDualTaskSpace(DQ_Kinematics* robot1, DQ_Kinematics* robot2);
+    DQ_CooperativeDualTaskSpace(const std::shared_ptr<DQ_Kinematics>& robot1, const std::shared_ptr<DQ_Kinematics>& robot2);
 
     DQ pose1(const VectorXd& theta);
     DQ pose2(const VectorXd& theta);

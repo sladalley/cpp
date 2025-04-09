@@ -47,6 +47,7 @@ ADD_LIBRARY(dqrobotics SHARED
     src/utils/DQ_Math.cpp
 
     src/robot_modeling/DQ_CooperativeDualTaskSpace.cpp
+    src/robot_modeling/DQ_ExtendedCooperativeDualTaskSpace.cpp
     src/robot_modeling/DQ_Kinematics.cpp
     src/robot_modeling/DQ_SerialManipulator.cpp
     src/robot_modeling/DQ_SerialManipulatorDH.cpp
@@ -101,6 +102,7 @@ INSTALL(FILES
 # robot_modeling headers
 INSTALL(FILES
     include/dqrobotics/robot_modeling/DQ_CooperativeDualTaskSpace.h
+    include/dqrobotics/robot_modeling/DQ_ExtendedCooperativeDualTaskSpace.h
     include/dqrobotics/robot_modeling/DQ_Kinematics.h
     include/dqrobotics/robot_modeling/DQ_SerialManipulator.h
     include/dqrobotics/robot_modeling/DQ_SerialManipulatorDH.h
@@ -176,6 +178,7 @@ INSTALL(FILES
     src/robot_modeling/DQ_SerialManipulatorMDH.cpp
     src/robot_modeling/DQ_SerialManipulatorDenso.cpp
     src/robot_modeling/DQ_CooperativeDualTaskSpace.cpp
+    src/robot_modeling/DQ_ExtendedCooperativeDualTaskSpace.cpp
     src/robot_modeling/DQ_Kinematics.cpp
     src/robot_modeling/DQ_MobileBase.cpp
     src/robot_modeling/DQ_DifferentialDriveRobot.cpp
