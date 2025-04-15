@@ -34,11 +34,11 @@ public:
     bool getBeta();
 
 
-    DQ extended_relative_pose(const VectorXd& theta);
-    DQ extended_absolute_pose(const VectorXd& theta);
+    DQ relative_pose(const VectorXd& theta) override;
+    DQ absolute_pose(const VectorXd& theta) override;
 
-    MatrixXd extended_relative_pose_jacobian(const VectorXd& theta);
-    MatrixXd extended_absolute_pose_jacobian(const VectorXd& theta);
+    MatrixXd relative_pose_jacobian(const VectorXd& theta) override;
+    MatrixXd absolute_pose_jacobian(const VectorXd& theta) override;
 
 };
 

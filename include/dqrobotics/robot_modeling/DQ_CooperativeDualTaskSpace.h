@@ -55,11 +55,11 @@ public:
     MatrixXd pose_jacobian1(const VectorXd& theta);
     MatrixXd pose_jacobian2(const VectorXd& theta);
 
-    DQ relative_pose(const VectorXd& theta);
-    DQ absolute_pose(const VectorXd& theta);
+    virtual DQ relative_pose(const VectorXd& theta);
+    virtual DQ absolute_pose(const VectorXd& theta);
 
-    MatrixXd relative_pose_jacobian(const VectorXd& theta);
-    MatrixXd absolute_pose_jacobian(const VectorXd& theta);
+    virtual MatrixXd relative_pose_jacobian(const VectorXd& theta);
+    virtual MatrixXd absolute_pose_jacobian(const VectorXd& theta);
 
 };
 

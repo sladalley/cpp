@@ -5,21 +5,23 @@ namespace DQ_robotics
 {
 
 DQ_ExtendedCooperativeDualTaskSpace::DQ_ExtendedCooperativeDualTaskSpace(const std::shared_ptr<DQ_Kinematics> &robot1, const std::shared_ptr<DQ_Kinematics> &robot2 )
-: DQ_CooperativeDualTaskSpace(robot1, robot2)
+    : DQ_CooperativeDualTaskSpace(robot1, robot2),
+    robot1_(robot1),
+    robot2_(robot2),
+    alpha_(0.5),
+    beta_(true)
 {
-    robot1_ = robot1;
-    robot2_ = robot2;
-    beta_ = true;
-    alpha_ = 0.5;
+
 }
 
-DQ_ExtendedCooperativeDualTaskSpace::DQ_ExtendedCooperativeDualTaskSpace(const std::shared_ptr<DQ_Kinematics> &robot1, const std::shared_ptr<DQ_Kinematics> &robot2 )
-: DQ_CooperativeDualTaskSpace(robot1, robot2)
+DQ_ExtendedCooperativeDualTaskSpace::DQ_ExtendedCooperativeDualTaskSpace(const std::shared_ptr<DQ_Kinematics> &robot1, const std::shared_ptr<DQ_Kinematics> &robot2, const bool &beta, const double &alpha )
+: DQ_CooperativeDualTaskSpace(robot1, robot2),
+  robot1_(robot1),
+  robot2_(robot2),
+  alpha_(alpha),
+  beta_(beta)
 {
-    robot1_ = robot1;
-    robot2_ = robot2;
-    beta_ = beta;
-    alpha_ = alpha;
+
 }
 
 void DQ_ExtendedCooperativeDualTaskSpace::setAlpha (const double &alpha) {
@@ -38,17 +40,17 @@ bool DQ_ExtendedCooperativeDualTaskSpace::getBeta () {
     return beta_;
 }
 
-DQ DQ_ExtendedCooperativeDualTaskSpace::extended_relative_pose(const VectorXd &theta)
+DQ DQ_ExtendedCooperativeDualTaskSpace::relative_pose(const VectorXd &theta)
 {
     return pow(conj(pose2(theta)),beta_)*pose1(theta);
 }
 
-DQ DQ_ExtendedCooperativeDualTaskSpace::extended_absolute_pose(const VectorXd &theta)
+DQ DQ_ExtendedCooperativeDualTaskSpace::absolute_pose(const VectorXd &theta)
 {
     return pose2(theta)*(pow(relative_pose(theta),(alpha_*beta_)));
 }
 
-MatrixXd DQ_ExtendedCooperativeDualTaskSpace::extended_relative_pose_jacobian(const VectorXd &theta)
+MatrixXd DQ_ExtendedCooperativeDualTaskSpace::relative_pose_jacobian(const VectorXd &theta)
 {
     const MatrixXd Jx1 = pose_jacobian1(theta);
     const DQ       x1  = pose1(theta);
@@ -64,7 +66,7 @@ MatrixXd DQ_ExtendedCooperativeDualTaskSpace::extended_relative_pose_jacobian(co
     return  Jxr;
 }
 
-MatrixXd DQ_ExtendedCooperativeDualTaskSpace::extended_absolute_pose_jacobian(const VectorXd &theta)
+MatrixXd DQ_ExtendedCooperativeDualTaskSpace::absolute_pose_jacobian(const VectorXd &theta)
 {
     //Preliminaries
     const MatrixXd Jx2 = pose_jacobian2(theta);

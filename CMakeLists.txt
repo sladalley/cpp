@@ -60,6 +60,7 @@ ADD_LIBRARY(dqrobotics SHARED
     src/robot_modeling/DQ_SerialWholeBody.cpp
 
     src/robot_control/DQ_KinematicController.cpp
+    src/robot_control/DQ_CooperativeKinematicController.cpp
     src/robot_control/DQ_PseudoinverseController.cpp
     src/robot_control/DQ_NumericalFilteredPseudoInverseController.cpp
     src/robot_control/DQ_KinematicConstrainedController.cpp
@@ -118,6 +119,7 @@ INSTALL(FILES
 # robot_control headers
 INSTALL(FILES
     include/dqrobotics/robot_control/DQ_KinematicController.h
+    include/dqrobotics/robot_control/DQ_CooperativeKinematicController.h
     include/dqrobotics/robot_control/DQ_PseudoinverseController.h
     include/dqrobotics/robot_control/DQ_NumericalFilteredPseudoInverseController.h
     include/dqrobotics/robot_control/DQ_KinematicConstrainedController.h
@@ -164,6 +166,7 @@ INSTALL(FILES
 # robot_control folder
 INSTALL(FILES
     src/robot_control/DQ_KinematicController.cpp
+    src/robot_control/DQ_CooperativeKinematicController.cpp
     src/robot_control/DQ_PseudoinverseController.cpp
     src/robot_control/DQ_NumericalFilteredPseudoInverseController.cpp
     src/robot_control/DQ_KinematicConstrainedController.cpp
