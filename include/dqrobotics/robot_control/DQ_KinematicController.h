@@ -107,7 +107,7 @@ public:
     //Virtual
     virtual ~DQ_KinematicController()=default;
     virtual VectorXd compute_setpoint_control_signal(const VectorXd& q, const VectorXd& task_reference)=0;
-    virtual VectorXd compute_tracking_control_signal(const VectorXd& q, const VectorXd& task_reference, const VectorXd& feed_forward)=0;
+     virtual VectorXd compute_tracking_control_signal(const VectorXd& q, const VectorXd& task_reference, const VectorXd& feed_forward)=0;
     virtual void verify_stability(const VectorXd& task_error);
 
 };

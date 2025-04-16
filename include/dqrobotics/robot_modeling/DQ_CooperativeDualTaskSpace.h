@@ -55,6 +55,8 @@ public:
     MatrixXd pose_jacobian1(const VectorXd& theta);
     MatrixXd pose_jacobian2(const VectorXd& theta);
 
+    int get_configuration_space();
+
     virtual DQ relative_pose(const VectorXd& theta);
     virtual DQ absolute_pose(const VectorXd& theta);
 

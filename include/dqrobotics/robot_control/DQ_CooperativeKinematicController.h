@@ -14,19 +14,19 @@ Contributors:
 namespace DQ_robotics
 {
 
-enum ControlObjective
+enum CooperativeControlObjective
 {
-    None,
-    Distance,
-    DistanceToPlane,
-    Line,
-    Plane,
-    Pose,
-    Rotation,
-    Translation
+    Coop_None,
+    Coop_Distance,
+    Coop_DistanceToPlane,
+    Coop_Line,
+    Coop_Plane,
+    Coop_Pose,
+    Coop_Rotation,
+    Coop_Translation
 };
 
-enum ControlFrame
+enum CooperativeControlFrame
 {
     NoFrame,
     AbsoluteFrame,
@@ -38,8 +38,8 @@ class DQ_CooperativeKinematicController
 protected:
 
     std::shared_ptr<DQ_CooperativeDualTaskSpace> cdts_sptr_;
-    std::vector<ControlObjective> control_objectives_;
-    std::vector<ControlFrame> control_frames_;
+    std::vector<CooperativeControlObjective> control_objectives_;
+    std::vector<CooperativeControlFrame> control_frames_;
     DQ attached_primitive_;
     DQ target_primitive_;
 
@@ -60,8 +60,8 @@ protected:
     DQ_CooperativeKinematicController();
 public:
 
-    std::vector<ControlObjective> get_control_objectives() const;
-    std::vector<ControlFrame> get_control_frames() const;
+    std::vector<CooperativeControlObjective> get_control_objectives() const;
+    std::vector<CooperativeControlFrame> get_control_frames() const;
 
     MatrixXd get_jacobian(const VectorXd& q) const;
 
@@ -73,8 +73,8 @@ public:
 
     bool system_reached_stable_region() const;
 
-    void set_control_objectives(const std::vector<ControlObjective>& control_objectives);
-    void set_control_frames(const std::vector<ControlFrame>& control_frames);
+    void set_control_objectives(const std::vector<CooperativeControlObjective>& control_objectives);
+    void set_control_frames(const std::vector<CooperativeControlFrame>& control_frames);
 
     void set_gain(const double& gain);
     double get_gain() const;
@@ -94,8 +94,8 @@ public:
 
     //Virtual
     virtual ~DQ_CooperativeKinematicController()=default;
-    virtual VectorXd compute_setpoint_control_signal(const VectorXd& q, const VectorXd& task_reference)=0;
-    virtual VectorXd compute_tracking_control_signal(const VectorXd& q, const VectorXd& task_reference, const VectorXd& feed_forward)=0;
+   virtual VectorXd compute_setpoint_control_signal(const VectorXd& q, const VectorXd& task_reference)=0;
+   virtual VectorXd compute_tracking_control_signal(const VectorXd& q, const VectorXd& task_reference, const VectorXd& feed_forward)=0;
     virtual void verify_stability(const VectorXd& task_error);
 
 };
