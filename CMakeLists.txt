@@ -67,6 +67,9 @@ ADD_LIBRARY(dqrobotics SHARED
     src/robot_control/DQ_KinematicConstrainedController.cpp
     src/robot_control/DQ_QuadraticProgrammingController.cpp
     src/robot_control/DQ_ClassicQPController.cpp
+    src/robot_control/DQ_CooperativeKinematicConstrainedController.cpp
+    src/robot_control/DQ_CooperativeQuadraticProgrammingController.cpp
+    src/robot_control/DQ_CooperativeClassicQPController.cpp
 
     src/robots/Ax18ManipulatorRobot.cpp
     src/robots/BarrettWamArmRobot.cpp
@@ -127,6 +130,9 @@ INSTALL(FILES
     include/dqrobotics/robot_control/DQ_KinematicConstrainedController.h
     include/dqrobotics/robot_control/DQ_QuadraticProgrammingController.h
     include/dqrobotics/robot_control/DQ_ClassicQPController.h
+    include/dqrobotics/robot_control/DQ_CooperativeKinematicConstrainedController.h
+    include/dqrobotics/robot_control/DQ_CooperativeQuadraticProgrammingController.h
+    include/dqrobotics/robot_control/DQ_CooperativeClassicQPController.h
     DESTINATION "include/dqrobotics/robot_control")
 
 # robots headers
@@ -175,6 +181,9 @@ INSTALL(FILES
     src/robot_control/DQ_KinematicConstrainedController.cpp
     src/robot_control/DQ_QuadraticProgrammingController.cpp
     src/robot_control/DQ_ClassicQPController.cpp
+    src/robot_control/DQ_CooperativeKinematicConstrainedController.cpp
+    src/robot_control/DQ_CooperativeQuadraticProgrammingController.cpp
+    src/robot_control/DQ_CooperativeClassicQPController.cpp
     DESTINATION "src/dqrobotics/robot_control")
 
 # robot_modeling folder
