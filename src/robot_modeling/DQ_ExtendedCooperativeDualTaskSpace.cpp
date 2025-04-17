@@ -52,14 +52,13 @@ DQ DQ_ExtendedCooperativeDualTaskSpace::absolute_pose(const VectorXd &theta)
 
 MatrixXd DQ_ExtendedCooperativeDualTaskSpace::relative_pose_jacobian(const VectorXd &theta)
 {
-    const MatrixXd Jx1 = pose_jacobian1(theta);
+    const MatrixXd Jx1 = pose_jacobian1(theta); 
     const DQ       x1  = pose1(theta);
     const MatrixXd Jx2 = pose_jacobian2(theta);
     const DQ       x2  = pose2(theta);
-    MatrixXd Jxr(8,robot1_->get_dim_configuration_space()+robot2_->get_dim_configuration_space());     
-
+    MatrixXd Jxr(8,_get_robot1_ptr()->get_dim_configuration_space()+_get_robot2_ptr()->get_dim_configuration_space());
     if (beta_ == false) {
-        Jxr << Jx1,MatrixXd::Zero(8,robot2_->get_dim_configuration_space());
+        Jxr << Jx1,MatrixXd::Zero(8,_get_robot2_ptr()->get_dim_configuration_space());
     } else {
         Jxr << (hamiplus8(conj(x2)))*Jx1,haminus8(x1)*C8()*Jx2;
     }
@@ -74,7 +73,7 @@ MatrixXd DQ_ExtendedCooperativeDualTaskSpace::absolute_pose_jacobian(const Vecto
     const MatrixXd Jxr  = relative_pose_jacobian(theta);
     const DQ       xr  = relative_pose(theta);
     const MatrixXd Jtr = DQ_Kinematics::translation_jacobian(Jxr,xr);
-    MatrixXd Jxa(8,robot1_->get_dim_configuration_space()+robot2_->get_dim_configuration_space());
+    MatrixXd Jxa(8,_get_robot1_ptr()->get_dim_configuration_space()+_get_robot2_ptr()->get_dim_configuration_space());
 
 
     //Rotation part
@@ -85,8 +84,8 @@ MatrixXd DQ_ExtendedCooperativeDualTaskSpace::absolute_pose_jacobian(const Vecto
     MatrixXd Jxr2(8,Jpxr.cols());
     Jxr2 << Jpxr, Jdxr;
 
-    MatrixXd temp(8,robot1_->get_dim_configuration_space()+robot2_->get_dim_configuration_space());
-    temp << MatrixXd::Zero(8,robot1_->get_dim_configuration_space()),Jx2;
+    MatrixXd temp(8,_get_robot1_ptr()->get_dim_configuration_space()+_get_robot2_ptr()->get_dim_configuration_space());
+    temp << MatrixXd::Zero(8,_get_robot1_ptr()->get_dim_configuration_space()),Jx2;
 
     if (beta_ == false) {
         Jxa << temp;

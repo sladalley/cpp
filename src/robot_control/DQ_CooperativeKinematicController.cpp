@@ -147,9 +147,11 @@ MatrixXd DQ_CooperativeKinematicController::get_jacobian(const VectorXd &q) cons
         case CooperativeControlObjective::Coop_Pose:
             task_jacobian = J_pose;
             break;
+
+         throw std::runtime_error("Unknown CooperativeControlObjective");
         }
         //The only way I found to fix both possible warnings of either having a default in the switch or not having the default.
-        throw std::runtime_error("Unknown CooperativeControlObjective");
+
        jacobians.push_back(task_jacobian);
        rows += task_jacobian.rows();
        cols = task_jacobian.cols();
@@ -283,27 +285,32 @@ bool DQ_CooperativeKinematicController::system_reached_stable_region() const
 void DQ_CooperativeKinematicController::set_control_objectives(const std::vector<CooperativeControlObjective>& control_objectives)
 {
     control_objectives_ = control_objectives;
+    int size = 0;
+
     for (unsigned int i = 0; i < control_objectives_.size();i++){
+            VectorXd last_error_;
         switch(control_objectives.at(i))
         {
         case CooperativeControlObjective::Coop_Distance: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
         case CooperativeControlObjective::Coop_DistanceToPlane:
-            last_error_signal_ << VectorXd::Zero(1);
+            last_error_ = VectorXd::Zero(1);
             break;
         case CooperativeControlObjective::Coop_Line: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
         case CooperativeControlObjective::Coop_Plane: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
         case CooperativeControlObjective::Coop_Pose:
-            last_error_signal_ << VectorXd::Zero(8);
+            last_error_ = VectorXd::Zero(8);
             break;
         case CooperativeControlObjective::Coop_Rotation:
         case CooperativeControlObjective::Coop_Translation:
-            last_error_signal_ << VectorXd::Zero(4);
+            last_error_ = VectorXd::Zero(4);
             break;
         case CooperativeControlObjective::Coop_None:
             break;
         }
-    }
+       size+=last_error_.size();
 
+    }
+    last_error_signal_ = VectorXd::Zero(size);
 }
 
 void DQ_CooperativeKinematicController::set_control_frames(const std::vector<CooperativeControlFrame> &control_frames)

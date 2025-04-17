@@ -57,12 +57,12 @@ DQ DQ_CooperativeDualTaskSpace::pose2(const VectorXd &theta)
 
 MatrixXd DQ_CooperativeDualTaskSpace::pose_jacobian1(const VectorXd &theta)
 {
-    return _get_robot1_ptr()->pose_jacobian(theta.head(robot1_->get_dim_configuration_space()));
+    return _get_robot1_ptr()->pose_jacobian(theta.head(_get_robot1_ptr()->get_dim_configuration_space()));
 }
 
 MatrixXd DQ_CooperativeDualTaskSpace::pose_jacobian2(const VectorXd &theta)
 {
-    return _get_robot2_ptr()->pose_jacobian(theta.tail(robot2_->get_dim_configuration_space()));
+    return _get_robot2_ptr()->pose_jacobian(theta.tail(_get_robot2_ptr()->get_dim_configuration_space()));
 }
 
 int DQ_CooperativeDualTaskSpace::get_configuration_space()

@@ -62,6 +62,7 @@ ADD_LIBRARY(dqrobotics SHARED
     src/robot_control/DQ_KinematicController.cpp
     src/robot_control/DQ_CooperativeKinematicController.cpp
     src/robot_control/DQ_PseudoinverseController.cpp
+    src/robot_control/DQ_CooperativePseudoinverseController.cpp
     src/robot_control/DQ_NumericalFilteredPseudoInverseController.cpp
     src/robot_control/DQ_KinematicConstrainedController.cpp
     src/robot_control/DQ_QuadraticProgrammingController.cpp
@@ -121,6 +122,7 @@ INSTALL(FILES
     include/dqrobotics/robot_control/DQ_KinematicController.h
     include/dqrobotics/robot_control/DQ_CooperativeKinematicController.h
     include/dqrobotics/robot_control/DQ_PseudoinverseController.h
+    include/dqrobotics/robot_control/DQ_CooperativePseudoinverseController.h
     include/dqrobotics/robot_control/DQ_NumericalFilteredPseudoInverseController.h
     include/dqrobotics/robot_control/DQ_KinematicConstrainedController.h
     include/dqrobotics/robot_control/DQ_QuadraticProgrammingController.h
@@ -168,6 +170,7 @@ INSTALL(FILES
     src/robot_control/DQ_KinematicController.cpp
     src/robot_control/DQ_CooperativeKinematicController.cpp
     src/robot_control/DQ_PseudoinverseController.cpp
+    src/robot_control/DQ_CooperativePseudoinverseController.cpp
     src/robot_control/DQ_NumericalFilteredPseudoInverseController.cpp
     src/robot_control/DQ_KinematicConstrainedController.cpp
     src/robot_control/DQ_QuadraticProgrammingController.cpp
