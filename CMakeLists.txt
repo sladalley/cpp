@@ -45,6 +45,7 @@ ADD_LIBRARY(dqrobotics SHARED
     src/utils/DQ_Geometry.cpp
     src/utils/DQ_LinearAlgebra.cpp
     src/utils/DQ_Math.cpp
+    src/utils/DQ_ConstraintManager.cpp
 
     src/robot_modeling/DQ_CooperativeDualTaskSpace.cpp
     src/robot_modeling/DQ_ExtendedCooperativeDualTaskSpace.cpp
@@ -101,6 +102,7 @@ INSTALL(FILES
     include/dqrobotics/utils/DQ_Math.h
     include/dqrobotics/utils/DQ_Geometry.h
     include/dqrobotics/utils/DQ_LinearAlgebra.h
+    include/dqrobotics/utils/DQ_ConstraintManager.h
     include/dqrobotics/utils/DQ_Constants.h
     DESTINATION "include/dqrobotics/utils")
 
@@ -169,6 +171,7 @@ INSTALL(FILES
     src/utils/DQ_Geometry.cpp
     src/utils/DQ_LinearAlgebra.cpp
     src/utils/DQ_Math.cpp
+    src/utils/DQ_ConstraintManager.cpp
     DESTINATION "src/dqrobotics/utils")
 
 # robot_control folder
