@@ -21,11 +21,13 @@
 # ################################################################*/
 
 #pragma once
-#include <Eigen/Dense>
+
+#include <tuple>
 #include <memory>
 #include <vector>
 #include <dqrobotics/DQ.h>
 #include <dqrobotics/robot_modeling/DQ_Kinematics.h>
+#include <dqrobotics/utils/DQ_Geometry.h>
 
 
 using namespace Eigen;
@@ -45,9 +47,9 @@ enum Direction
 enum PrimitiveType
 {
     NoType,
-    LineType,
+  //  LineType,
     PointType,
-    PlaneType,
+    //PlaneType,
 };
 
 class DQ_ConstraintManager
@@ -65,12 +67,12 @@ protected:
     VectorXd inequality_constraint_vector_ = VectorXd::Zero(0);
 
     std::vector<std::tuple<PrimitiveType, PrimitiveType>> robot_to_robot_vfi_primitive_type_;
-    std::vector<std::tuple<const std::shared_ptr<DQ_Kinematics>&, const int&, const std::shared_ptr<DQ_Kinematics>& , const int& >> robot_to_robot_vfi_;
-    std::vector<std::tuple<Direction, const double>> robot_to_robot_vfi_definition_;
+    std::vector<std::tuple<std::shared_ptr<DQ_Kinematics>,  int, VectorXd , std::shared_ptr<DQ_Kinematics> ,  int, VectorXd >> robot_to_robot_vfi_;
+    std::vector<std::tuple<Direction,  double>> robot_to_robot_vfi_definition_;
 
     std::vector<std::tuple<PrimitiveType, PrimitiveType>> environment_to_robot_vfi_primitive_type_;
-    std::vector<std::tuple<DQ, const std::shared_ptr<DQ_Kinematics>&, const int& >> environment_to_robot_vfi_;
-    std::vector<std::tuple<Direction, const double>> environment_to_robot_vfi_definition_;
+    std::vector<std::tuple<DQ,  std::shared_ptr<DQ_Kinematics>,  int, VectorXd >> environment_to_robot_vfi_;
+    std::vector<std::tuple<Direction,  double>> environment_to_robot_vfi_definition_;
 
     MatrixXd _raw_add_matrix_constraint(const MatrixXd& A0, const MatrixXd& A);
     VectorXd _raw_add_vector_constraint(const VectorXd& b0, const VectorXd& b);
@@ -80,8 +82,8 @@ protected:
     void _check_vector_initialization(const VectorXd& q, const std::string &msg);
     MatrixXd _create_matrix(const MatrixXd& A);
 
-    std::tuple<MatrixXd, VectorXd> compute_robot_to_robot_constraint(VectorXd& q1, VectorXd& q2);
-    std::tuple<MatrixXd, VectorXd> compute_environment_to_robot_constraint();
+    std::tuple<MatrixXd, VectorXd> _compute_robot_to_robot_constraint();
+    std::tuple<MatrixXd, VectorXd> _compute_environment_to_robot_constraint();
 
 
 public:
@@ -98,12 +100,14 @@ public:
     void set_joint_position_limits(const VectorXd& q_lower_bound, const VectorXd& q_upper_bound);
     void set_joint_velocity_limits(const VectorXd& q_dot_lower_bound, const VectorXd& q_dot_upper_bound);
 
-    void set_robot_to_robot_vfi(std::vector<std::tuple<PrimitiveType, PrimitiveType>> robot_to_robot_vfi_primitive_type, std::vector<std::tuple<const std::shared_ptr<DQ_Kinematics>&, const int&, const std::shared_ptr<DQ_Kinematics>& , const int& >> robot_to_robot_vfi, std::vector<std::tuple<Direction, const double>> robot_to_robot_vfi_definition);
-    void set_environment_to_robot_vfi(std::vector<std::tuple<PrimitiveType, PrimitiveType>> environment_to_robot_vfi_primitive_type, std::vector<std::tuple<DQ, const std::shared_ptr<DQ_Kinematics>&, const int& >> environment_to_robot_vfi, std::vector<std::tuple<Direction, const double>> environment_to_robot_vfi_definition);
+    void set_robot_to_robot_vfi(std::vector<std::tuple<PrimitiveType, PrimitiveType>> robot_to_robot_vfi_primitive_type, std::vector<std::tuple< std::shared_ptr<DQ_Kinematics>,  int, VectorXd,  std::shared_ptr<DQ_Kinematics> , int, VectorXd >> robot_to_robot_vfi, std::vector<std::tuple<Direction, double>> robot_to_robot_vfi_definition);
+    void set_environment_to_robot_vfi(std::vector<std::tuple<PrimitiveType, PrimitiveType>> environment_to_robot_vfi_primitive_type, std::vector<std::tuple<DQ,  std::shared_ptr<DQ_Kinematics>, int, VectorXd >> environment_to_robot_vfi, std::vector<std::tuple<Direction, double>> environment_to_robot_vfi_definition);
 
     void get_robot_to_robot_vfi();
     void get_environment_to_robot_vfi();
 
-    std::tuple<MatrixXd, VectorXd> create_VFI_constraints();
+    void compute_robot_to_robot_constraint();
+    void compute_environment_to_robot_constraint();
+
 };
 }
