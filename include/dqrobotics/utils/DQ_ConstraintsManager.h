@@ -21,41 +21,17 @@
 # ################################################################*/
 
 #pragma once
-
-#include <tuple>
-#include <memory>
+#include <Eigen/Dense>
 #include <vector>
-#include <dqrobotics/DQ.h>
-#include <dqrobotics/robot_modeling/DQ_Kinematics.h>
-#include <dqrobotics/utils/DQ_Geometry.h>
 
 
 using namespace Eigen;
 
-namespace DQ_robotics
-{
-
-
-
-enum Direction
-{
-    NoZone,
-    ForbiddenZone,
-    SafeZone
-};
-
-enum PrimitiveType
-{
-    NoType,
-  //  LineType,
-    PointType,
-    //PlaneType,
-};
-
-class DQ_ConstraintManager
+class ConstraintsManager
 {
 protected:
     int dim_configuration_;
+
     VectorXd q_dot_min_ = VectorXd::Zero(0);
     VectorXd q_dot_max_ = VectorXd::Zero(0);
     VectorXd q_min_ = VectorXd::Zero(0);
@@ -66,14 +42,6 @@ protected:
     MatrixXd inequality_constraint_matrix_ = MatrixXd::Zero(0,0);
     VectorXd inequality_constraint_vector_ = VectorXd::Zero(0);
 
-    std::vector<std::tuple<PrimitiveType, PrimitiveType>> robot_to_robot_vfi_primitive_type_;
-    std::vector<std::tuple<std::shared_ptr<DQ_Kinematics>,  int, VectorXd , std::shared_ptr<DQ_Kinematics> ,  int, VectorXd >> robot_to_robot_vfi_;
-    std::vector<std::tuple<Direction,  double>> robot_to_robot_vfi_definition_;
-
-    std::vector<std::tuple<PrimitiveType, PrimitiveType>> environment_to_robot_vfi_primitive_type_;
-    std::vector<std::tuple<DQ,  std::shared_ptr<DQ_Kinematics>,  int, VectorXd >> environment_to_robot_vfi_;
-    std::vector<std::tuple<Direction,  double>> environment_to_robot_vfi_definition_;
-
     MatrixXd _raw_add_matrix_constraint(const MatrixXd& A0, const MatrixXd& A);
     VectorXd _raw_add_vector_constraint(const VectorXd& b0, const VectorXd& b);
     void _check_matrix_and_vector_sizes(const MatrixXd& A, const VectorXd& b);
@@ -82,14 +50,9 @@ protected:
     void _check_vector_initialization(const VectorXd& q, const std::string &msg);
     MatrixXd _create_matrix(const MatrixXd& A);
 
-    std::tuple<MatrixXd, VectorXd> _compute_robot_to_robot_constraint();
-    std::tuple<MatrixXd, VectorXd> _compute_environment_to_robot_constraint();
-
-
 public:
-    DQ_ConstraintManager() = delete;
-    DQ_ConstraintManager(const int& dim_configuration);
-
+    ConstraintsManager() = delete;
+    ConstraintsManager(const int& dim_configuration);
 
     void add_equality_constraint(const MatrixXd& A, const VectorXd& b);
     void add_inequality_constraint(const MatrixXd& A, const VectorXd& b);
@@ -99,15 +62,4 @@ public:
 
     void set_joint_position_limits(const VectorXd& q_lower_bound, const VectorXd& q_upper_bound);
     void set_joint_velocity_limits(const VectorXd& q_dot_lower_bound, const VectorXd& q_dot_upper_bound);
-
-    void set_robot_to_robot_vfi(std::vector<std::tuple<PrimitiveType, PrimitiveType>> robot_to_robot_vfi_primitive_type, std::vector<std::tuple< std::shared_ptr<DQ_Kinematics>,  int, VectorXd,  std::shared_ptr<DQ_Kinematics> , int, VectorXd >> robot_to_robot_vfi, std::vector<std::tuple<Direction, double>> robot_to_robot_vfi_definition);
-    void set_environment_to_robot_vfi(std::vector<std::tuple<PrimitiveType, PrimitiveType>> environment_to_robot_vfi_primitive_type, std::vector<std::tuple<DQ,  std::shared_ptr<DQ_Kinematics>, int, VectorXd >> environment_to_robot_vfi, std::vector<std::tuple<Direction, double>> environment_to_robot_vfi_definition);
-
-    void get_robot_to_robot_vfi();
-    void get_environment_to_robot_vfi();
-
-    void compute_robot_to_robot_constraint();
-    void compute_environment_to_robot_constraint();
-
 };
-}
