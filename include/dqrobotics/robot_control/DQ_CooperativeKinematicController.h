@@ -14,21 +14,21 @@ Contributors:
 namespace DQ_robotics
 {
 
-enum CooperativeControlObjective
+enum class CooperativeControlObjective
 {
-    Coop_None,
-    Coop_Distance,
-    Coop_DistanceToPlane,
-    Coop_Line,
-    Coop_Plane,
-    Coop_Pose,
-    Coop_Rotation,
-    Coop_Translation
+    None,
+    Distance,
+    DistanceToPlane,
+    Line,
+    Plane,
+    Pose,
+    Rotation,
+    Translation
 };
 
-enum CooperativeControlFrame
+enum class CooperativeControlFrame
 {
-    NoFrame,
+    None,
     AbsoluteFrame,
     RelativeFrame
 };

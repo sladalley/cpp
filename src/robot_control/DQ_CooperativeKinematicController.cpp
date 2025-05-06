@@ -26,8 +26,8 @@ DQ_CooperativeKinematicController::DQ_CooperativeKinematicController(const std::
 
 DQ_CooperativeKinematicController::DQ_CooperativeKinematicController():
     cdts_sptr_(nullptr),
-    control_objectives_(CooperativeControlObjective::Coop_None), //change to initialisation of empty vector
-    control_frames_(CooperativeControlFrame::NoFrame), //change to initialisipn of empty vector
+    control_objectives_({CooperativeControlObjective::None}), //change to initialisation of empty vector
+    control_frames_({CooperativeControlFrame::None}), //change to initialisipn of empty vector
     attached_primitive_(0.0),
     target_primitive_(0.0),
     gain_(0.0),
@@ -93,7 +93,7 @@ MatrixXd DQ_CooperativeKinematicController::get_jacobian(const VectorXd &q) cons
 
         switch(control_frames_.at(i))
         {
-        case CooperativeControlFrame::NoFrame:
+        case CooperativeControlFrame::None:
             throw std::runtime_error("The control frame must be intialised with set_control_frame()");
 
         case CooperativeControlFrame::AbsoluteFrame:
@@ -109,14 +109,14 @@ MatrixXd DQ_CooperativeKinematicController::get_jacobian(const VectorXd &q) cons
         MatrixXd task_jacobian;
         switch(control_objectives_.at(i))
         {
-        case CooperativeControlObjective::Coop_None:
+        case CooperativeControlObjective::None:
             throw std::runtime_error("The control objective must be initialized with set_control_objective()");
 
-        case CooperativeControlObjective::Coop_Distance:
+        case CooperativeControlObjective::Distance:
             task_jacobian = DQ_Kinematics::distance_jacobian(J_pose,x_pose);
             break;
 
-        case CooperativeControlObjective::Coop_DistanceToPlane:
+        case CooperativeControlObjective::DistanceToPlane:
         {
             if(!is_plane(target_primitive_))
             {
@@ -128,23 +128,23 @@ MatrixXd DQ_CooperativeKinematicController::get_jacobian(const VectorXd &q) cons
             break;
         }
 
-        case CooperativeControlObjective::Coop_Line:
+        case CooperativeControlObjective::Line:
             task_jacobian = DQ_Kinematics::line_jacobian(J_pose,x_pose,attached_primitive_);
             break;
 
-        case CooperativeControlObjective::Coop_Plane:
+        case CooperativeControlObjective::Plane:
             task_jacobian = DQ_Kinematics::plane_jacobian(J_pose,x_pose,attached_primitive_);
             break;
 
-        case CooperativeControlObjective::Coop_Rotation:
+        case CooperativeControlObjective::Rotation:
             task_jacobian = DQ_Kinematics::rotation_jacobian(J_pose);
             break;
 
-        case CooperativeControlObjective::Coop_Translation:
+        case CooperativeControlObjective::Translation:
             task_jacobian = DQ_Kinematics::translation_jacobian(J_pose,x_pose);
             break;
 
-        case CooperativeControlObjective::Coop_Pose:
+        case CooperativeControlObjective::Pose:
             task_jacobian = J_pose;
             break;
 
@@ -187,7 +187,7 @@ VectorXd DQ_CooperativeKinematicController::get_task_variable(const VectorXd &q)
 
         switch(control_frames_.at(i))
         {
-        case CooperativeControlFrame::NoFrame:
+        case CooperativeControlFrame::None:
             throw std::runtime_error("The control frame must be intialised with set_control_frame()");
 
         case CooperativeControlFrame::AbsoluteFrame:
@@ -203,17 +203,17 @@ VectorXd DQ_CooperativeKinematicController::get_task_variable(const VectorXd &q)
 
         switch(control_objectives_.at(i))
         {
-        case CooperativeControlObjective::Coop_None:
+        case CooperativeControlObjective::None:
             throw std::runtime_error("The control objective must be initialized with set_control_objective()");
 
-        case CooperativeControlObjective::Coop_Distance:
+        case CooperativeControlObjective::Distance:
         {
             VectorXd p = vec4(translation(x_pose));
             task_variable = p.transpose()*p;
             break;
         }
 
-        case CooperativeControlObjective::Coop_DistanceToPlane:
+        case CooperativeControlObjective::DistanceToPlane:
         {
             if(!is_plane(target_primitive_))
             {
@@ -226,23 +226,23 @@ VectorXd DQ_CooperativeKinematicController::get_task_variable(const VectorXd &q)
             break;
         }
 
-        case CooperativeControlObjective::Coop_Line:
+        case CooperativeControlObjective::Line:
             task_variable = vec8(Ad(x_pose,attached_primitive_));
             break;
 
-        case CooperativeControlObjective::Coop_Plane:
+        case CooperativeControlObjective::Plane:
             task_variable = vec8(Adsharp(x_pose,attached_primitive_));
             break;
 
-        case CooperativeControlObjective::Coop_Rotation:
+        case CooperativeControlObjective::Rotation:
             task_variable = vec4(rotation(x_pose));
             break;
 
-        case CooperativeControlObjective::Coop_Translation:
+        case CooperativeControlObjective::Translation:
             task_variable = vec4(translation(x_pose));
             break;
 
-        case CooperativeControlObjective::Coop_Pose:
+        case CooperativeControlObjective::Pose:
             task_variable = vec8(x_pose);
             break;
         }
@@ -264,7 +264,7 @@ bool DQ_CooperativeKinematicController::is_set() const
     bool set = false;
     for(unsigned int i = 0;i<control_objectives_.size();i++){
 
-        if(control_objectives_.at(i)==CooperativeControlObjective::Coop_None)
+        if(control_objectives_.at(i)==CooperativeControlObjective::None)
         {
             set = false;
             break;
@@ -291,20 +291,20 @@ void DQ_CooperativeKinematicController::set_control_objectives(const std::vector
             VectorXd last_error_;
         switch(control_objectives.at(i))
         {
-        case CooperativeControlObjective::Coop_Distance: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
-        case CooperativeControlObjective::Coop_DistanceToPlane:
+        case CooperativeControlObjective::Distance: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
+        case CooperativeControlObjective::DistanceToPlane:
             last_error_ = VectorXd::Zero(1);
             break;
-        case CooperativeControlObjective::Coop_Line: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
-        case CooperativeControlObjective::Coop_Plane: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
-        case CooperativeControlObjective::Coop_Pose:
+        case CooperativeControlObjective::Line: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
+        case CooperativeControlObjective::Plane: //This was intentional https://en.cppreference.com/w/cpp/language/attributes/fallthrough
+        case CooperativeControlObjective::Pose:
             last_error_ = VectorXd::Zero(8);
             break;
-        case CooperativeControlObjective::Coop_Rotation:
-        case CooperativeControlObjective::Coop_Translation:
+        case CooperativeControlObjective::Rotation:
+        case CooperativeControlObjective::Translation:
             last_error_ = VectorXd::Zero(4);
             break;
-        case CooperativeControlObjective::Coop_None:
+        case CooperativeControlObjective::None:
             break;
         }
        size+=last_error_.size();

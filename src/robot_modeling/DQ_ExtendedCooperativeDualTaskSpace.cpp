@@ -49,6 +49,31 @@ DQ DQ_ExtendedCooperativeDualTaskSpace::absolute_pose(const VectorXd &theta)
 {
     return pose2(theta)*(pow(relative_pose(theta),(alpha_*beta_)));
 }
+/**
+ * @brief DQ_ExtendedCooperativeDualTaskSpace::_relative_twist given in respect to inertial frame
+ * @param twist_0_0_1: given in respect to inertial frame
+ * @param twist_0_0_2: given in respect to inertial frame
+ * @return
+ */
+DQ DQ_ExtendedCooperativeDualTaskSpace::relative_twist(const DQ twist_0_0_1, const DQ twist_0_0_2)
+{
+    return twist_0_0_1-twist_0_0_2;
+}
+/**
+* @brief DQ_ExtendedCooperativeDualTaskSpace::absolute_twist given in respect to absolute frame
+* @param twist_1: given in respect to body frame
+* @param twist_2: given in respect to body frame
+* @return
+*/
+DQ DQ_ExtendedCooperativeDualTaskSpace::absolute_twist(const DQ twist_1_0_1, const DQ twist_2_0_2, const VectorXd &theta)
+{
+    const DQ r_0_a = rotation(absolute_pose(theta));
+    const DQ r_a_2 = conj(r_0_a)*rotation(pose2(theta));
+    const DQ r_a_1 = conj(r_0_a)*rotation(pose1(theta));
+    const DQ absolute_twist = (1-alpha_)*Ad(r_a_2,twist_2_0_2) + alpha_*Ad(r_a_1,twist_1_0_1);
+
+    return absolute_twist;
+}
 
 MatrixXd DQ_ExtendedCooperativeDualTaskSpace::relative_pose_jacobian(const VectorXd &theta)
 {

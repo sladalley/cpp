@@ -37,6 +37,10 @@ public:
     DQ relative_pose(const VectorXd& theta) override;
     DQ absolute_pose(const VectorXd& theta) override;
 
+
+    DQ relative_twist(const DQ twist_0_0_1, const DQ twist_0_0_2);
+    DQ absolute_twist(const DQ twist_1_0_1, const DQ twist_2_0_2, const VectorXd &theta);
+
     MatrixXd relative_pose_jacobian(const VectorXd& theta) override;
     MatrixXd absolute_pose_jacobian(const VectorXd& theta) override;
 

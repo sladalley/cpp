@@ -29,7 +29,8 @@
  */
 namespace DQ_robotics
 {
-DQ_VFIConstraintManager::DQ_VFIConstraintManager(const int& dim_configuration):dim_configuration_(dim_configuration)
+DQ_VFIConstraintManager::DQ_VFIConstraintManager(const int& dim_configuration, const int& num_robots):dim_configuration_(dim_configuration),
+    num_robots_(num_robots)
 {
 
 }
@@ -167,51 +168,51 @@ void DQ_VFIConstraintManager::compute_robot_to_workspace_constraint()
         VectorXd constraint_derror = VectorXd(1);
 
 
-        if((vfi.robot_type == PrimitiveType::NoType) || (vfi.workspace_type == PrimitiveType::NoType))
+        if((vfi.robot_type == PrimitiveType::None) || (vfi.workspace_type == PrimitiveType::None))
              {throw std::runtime_error("VFI primitives not set");}
 
-        if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::PointType)){
+        if((vfi.robot_type == PrimitiveType::Point) && (vfi.workspace_type == PrimitiveType::Point)){
             std::tie(constraint_jacobian, constraint_derror) = point_to_point_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
 
         }
 
-        else if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::LineType)){
+        else if((vfi.robot_type == PrimitiveType::Point)&& (vfi.workspace_type == PrimitiveType::Line)){
             std::tie(constraint_jacobian, constraint_derror) = point_to_line_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
-        else if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::PlaneType)){
+        else if((vfi.robot_type == PrimitiveType::Point) && (vfi.workspace_type == PrimitiveType::Plane)){
             std::tie(constraint_jacobian, constraint_derror) = point_to_plane_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
 
-        else if((vfi.robot_type == PrimitiveType::LineType) && (vfi.workspace_type == PrimitiveType::LineType)){
+        else if((vfi.robot_type == PrimitiveType::Line) && (vfi.workspace_type == PrimitiveType::Line)){
             std::tie(constraint_jacobian, constraint_derror) = line_to_line_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
-        else if((vfi.robot_type == PrimitiveType::LineType) && (vfi.workspace_type == PrimitiveType::PointType)){
+        else if((vfi.robot_type == PrimitiveType::Line) && (vfi.workspace_type == PrimitiveType::Point)){
             std::tie(constraint_jacobian, constraint_derror) = line_to_point_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
 
         }
-        else if((vfi.robot_type == PrimitiveType::PlaneType) && (vfi.workspace_type == PrimitiveType::PointType)){
+        else if((vfi.robot_type == PrimitiveType::Plane) && (vfi.workspace_type == PrimitiveType::Point)){
             std::tie(constraint_jacobian, constraint_derror) = plane_to_point_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else if((vfi.robot_type == PrimitiveType::LineAngle) && (vfi.workspace_type == PrimitiveType::LineAngle)){
             std::tie(constraint_jacobian, constraint_derror) = line_to_line_angle_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
-        else if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::PlaneType)){
+        else if((vfi.robot_type == PrimitiveType::Point) && (vfi.workspace_type == PrimitiveType::Plane)){
             std::tie(constraint_jacobian, constraint_derror) = point_to_plane_VFI(vfi);
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else throw std::runtime_error("VFI Primitive is not compatible");
@@ -332,7 +333,11 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       MatrixXd point_to_point_jacobian;
       VectorXd point_to_point_derror = VectorXd(1);
       auto robot_ptr = vfi.robot;
-      auto robot_index = vfi.joint_index;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
       auto q = vfi.joint_angles;
       auto workspace_point = vfi.workspace_primitive;
 
@@ -369,7 +374,11 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       MatrixXd point_to_line_jacobian;
       VectorXd point_to_line_derror = VectorXd(1);
       auto robot_ptr = vfi.robot;
-      auto robot_index = vfi.joint_index;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
       auto q = vfi.joint_angles;
       auto workspace_line = vfi.workspace_primitive;
 
@@ -405,7 +414,11 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       MatrixXd point_to_plane_jacobian;
       VectorXd point_to_plane_derror = VectorXd(1);
       auto robot_ptr = vfi.robot;
-      auto robot_index = vfi.joint_index;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
       auto q = vfi.joint_angles;
       auto workspace_plane = vfi.workspace_primitive;
 
@@ -441,7 +454,11 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       MatrixXd line_to_line_jacobian;
       VectorXd line_to_line_derror = VectorXd(1);
       auto robot_ptr = vfi.robot;
-      auto robot_index = vfi.joint_index;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
       auto q = vfi.joint_angles;
       auto workspace_line = vfi.workspace_primitive;
 
@@ -478,7 +495,11 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       MatrixXd line_to_point_jacobian;
       VectorXd line_to_point_derror = VectorXd(1);
       auto robot_ptr = vfi.robot;
-      auto robot_index = vfi.joint_index;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
       auto q = vfi.joint_angles;
       auto workspace_point = vfi.workspace_primitive;
 
@@ -516,7 +537,11 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       MatrixXd plane_to_point_jacobian;
       VectorXd plane_to_point_derror = VectorXd(1);
       auto robot_ptr = vfi.robot;
-      auto robot_index = vfi.joint_index;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
       auto q = vfi.joint_angles;
       auto workspace_point = vfi.workspace_primitive;
 
@@ -595,14 +620,31 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       return std::make_tuple(line_to_line_angle_jacobian, vfi.vfi_gain*line_to_line_angle_derror);
   }
 
-  MatrixXd DQ_VFIConstraintManager::_make_matrix_compatible_size(const MatrixXd& A) {
-      if(A.cols()!=dim_configuration_)
-      {
+  MatrixXd DQ_VFIConstraintManager::_make_matrix_compatible_size(const MatrixXd& A, const robot_to_workspace_VFI_definition &vfi) {
+      auto robot_index = vfi.robot_index;
+      MatrixXd temp;
+      if(A.cols()!=vfi.robot->get_dim_configuration_space())
+        {
+          MatrixXd J_extended(A.rows(), vfi.robot->get_dim_configuration_space());
+          J_extended << A, MatrixXd::Zero(A.rows(),(vfi.robot->get_dim_configuration_space()-A.cols()));
+          temp = J_extended;
+          }
+        else temp = A;
 
-          MatrixXd J_extended(A.rows(), dim_configuration_);
-          J_extended << A, MatrixXd::Zero(A.rows(),(dim_configuration_-A.cols()));
-          return J_extended;
+      if(temp.cols()!=dim_configuration_){
+        MatrixXd J_extended(A.rows(), dim_configuration_);
+          if (robot_index == 0)
+          {
+              J_extended << A, MatrixXd::Zero(A.rows(),(dim_configuration_-A.cols()));
+              return J_extended;
+          }
+          else
+          {
+              J_extended << MatrixXd::Zero(A.rows(),(dim_configuration_-A.cols())), A;
+              return J_extended;
+          }
+
       }
-      else return A;
-  }
+        else return temp;
+    }
 }

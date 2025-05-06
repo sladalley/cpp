@@ -37,33 +37,33 @@ namespace DQ_robotics
 
 
 
-enum Direction
+enum class Direction
 {
-    NoZone,
+    None,
     ForbiddenZone,
     SafeZone
 };
 
-enum PrimitiveType
+enum class PrimitiveType
 {
-    NoType,
-    LineType,
-    PointType,
-    PlaneType,
+    None,
+    Line,
+    Point,
+    Plane,
     LineAngle
 };
 
-
 struct robot_to_workspace_VFI_definition
 {
-    PrimitiveType robot_type = PrimitiveType:: NoType;
-    PrimitiveType workspace_type = PrimitiveType:: NoType;
+    PrimitiveType robot_type = PrimitiveType:: None;
+    PrimitiveType workspace_type = PrimitiveType:: None;
     std::shared_ptr<DQ_Kinematics> robot = nullptr;
     int joint_index = -1;
+    int robot_index = 0;
     VectorXd joint_angles = VectorXd::Zero(0);
     DQ workspace_primitive = DQ(0);
     DQ line_plane_normal = -k_;
-    Direction direction = Direction::NoZone;
+    Direction direction = Direction::None;
     double safe_distance = 0.0;
     double vfi_gain = 1;
 
@@ -74,6 +74,7 @@ struct robot_to_workspace_VFI_definition
         PrimitiveType workspace_type,
         std::shared_ptr<DQ_Kinematics> robot,
         int joint_index,
+        int robot_index,
         const VectorXd& joint_angles,
         const DQ& workspace_primitive,
         double safe_distance,
@@ -86,6 +87,7 @@ struct robot_to_workspace_VFI_definition
           workspace_type(workspace_type),
           robot(robot),
           joint_index(joint_index),
+          robot_index(robot_index),
           joint_angles(joint_angles),
           workspace_primitive(workspace_primitive),
           line_plane_normal(line_plane_normal),
@@ -101,6 +103,7 @@ class DQ_VFIConstraintManager
 {
 protected:
     int dim_configuration_;
+    int num_robots_;
     VectorXd q_dot_min_ = VectorXd::Zero(0);
     VectorXd q_dot_max_ = VectorXd::Zero(0);
     VectorXd q_min_ = VectorXd::Zero(0);
@@ -116,7 +119,7 @@ protected:
     MatrixXd _raw_add_matrix_constraint(const MatrixXd& A0, const MatrixXd& A);
     VectorXd _raw_add_vector_constraint(const VectorXd& b0, const VectorXd& b);
     void _check_matrix_and_vector_sizes(const MatrixXd& A, const VectorXd& b);
-    MatrixXd _make_matrix_compatible_size(const MatrixXd& A);
+    MatrixXd _make_matrix_compatible_size(const MatrixXd& A, const robot_to_workspace_VFI_definition &vfi);
 
     void _check_vectors_size(const VectorXd& q1, const VectorXd& q2, const std::string &msg);
     void _check_vector_initialization(const VectorXd& q, const std::string &msg);
@@ -137,7 +140,7 @@ protected:
 
 public:
     DQ_VFIConstraintManager() = delete;
-    DQ_VFIConstraintManager(const int& dim_configuration);
+    DQ_VFIConstraintManager(const int& dim_configuration, const int& num_robots);
 
 
     void add_equality_constraint(const MatrixXd& A, const VectorXd& b);
@@ -151,12 +154,11 @@ public:
 
    // void set_robot_to_robot_vfi(std::vector<std::tuple<PrimitiveType, PrimitiveType>> robot_to_robot_vfi_primitive_type, std::vector<std::tuple< std::shared_ptr<DQ_Kinematics>,  int, VectorXd,  std::shared_ptr<DQ_Kinematics> , int, VectorXd >> robot_to_robot_vfi, std::vector<std::tuple<Direction, double>> robot_to_robot_vfi_definition);
     void set_robot_to_workspace_vfi(const std::vector<robot_to_workspace_VFI_definition>& robot_to_workspace_vfis);
-    std::vector<robot_to_workspace_VFI_definition> get_robot_to_workspace_vfi();
+//    std::vector<robot_to_workspace_VFI_definition> get_robot_to_workspace_vfi();
     void get_robot_to_environment_vfi();
 
     void compute_robot_to_robot_constraint();
     void compute_robot_to_workspace_constraint();
-    void compute_joint_angle_constraint();
     void compute_joint_velocity_constraint();
 
 
