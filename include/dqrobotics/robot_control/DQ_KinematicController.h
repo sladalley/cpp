@@ -29,7 +29,7 @@ Contributors:
 namespace DQ_robotics
 {
 
-enum ControlObjective
+enum class ControlObjective
 {
     None,
     Distance,
