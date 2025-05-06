@@ -172,33 +172,47 @@ void DQ_VFIConstraintManager::compute_robot_to_workspace_constraint()
 
         if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::PointType)){
             std::tie(constraint_jacobian, constraint_derror) = point_to_point_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
+
         }
 
         else if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::LineType)){
             std::tie(constraint_jacobian, constraint_derror) = point_to_line_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::PlaneType)){
             std::tie(constraint_jacobian, constraint_derror) = point_to_plane_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
 
         else if((vfi.robot_type == PrimitiveType::LineType) && (vfi.workspace_type == PrimitiveType::LineType)){
             std::tie(constraint_jacobian, constraint_derror) = line_to_line_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else if((vfi.robot_type == PrimitiveType::LineType) && (vfi.workspace_type == PrimitiveType::PointType)){
+            std::tie(constraint_jacobian, constraint_derror) = line_to_point_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            add_inequality_constraint(constraint_jacobian, constraint_derror);
 
         }
         else if((vfi.robot_type == PrimitiveType::PlaneType) && (vfi.workspace_type == PrimitiveType::PointType)){
-
+            std::tie(constraint_jacobian, constraint_derror) = plane_to_point_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else if((vfi.robot_type == PrimitiveType::LineAngle) && (vfi.workspace_type == PrimitiveType::LineAngle)){
-
+            std::tie(constraint_jacobian, constraint_derror) = line_to_line_angle_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else if((vfi.robot_type == PrimitiveType::PointType) && (vfi.workspace_type == PrimitiveType::PlaneType)){
-
+            std::tie(constraint_jacobian, constraint_derror) = point_to_plane_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian);
+            add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else throw std::runtime_error("VFI Primitive is not compatible");
 
@@ -312,7 +326,6 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
   void DQ_VFIConstraintManager::set_robot_to_workspace_vfi(const std::vector<robot_to_workspace_VFI_definition> &robot_to_workspace_vfis)
 {
     robot_to_workspace_vfis_= robot_to_workspace_vfis;
-    std::cout<<" "<<robot_to_workspace_vfis_.at(0).robot_type<<std::endl;
 }
 
   std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::point_to_point_VFI(const robot_to_workspace_VFI_definition &vfi) {
@@ -349,7 +362,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
       else throw std::runtime_error("Zone of VFI not defined");
 
-      return std::make_tuple(point_to_point_jacobian, point_to_point_derror);
+      return std::make_tuple(point_to_point_jacobian, vfi.vfi_gain*point_to_point_derror);
   }
 
   std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::point_to_line_VFI(const robot_to_workspace_VFI_definition &vfi){
@@ -386,7 +399,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
       else throw std::runtime_error("Zone of VFI not defined");
 
-      return std::make_tuple(point_to_line_jacobian, point_to_line_derror);
+      return std::make_tuple(point_to_line_jacobian, vfi.vfi_gain*point_to_line_derror);
   }
   std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::point_to_plane_VFI(const robot_to_workspace_VFI_definition &vfi){
       MatrixXd point_to_plane_jacobian;
@@ -422,7 +435,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
       else throw std::runtime_error("Zone of VFI not defined");
 
-      return std::make_tuple(point_to_plane_jacobian, point_to_plane_derror);
+      return std::make_tuple(point_to_plane_jacobian, vfi.vfi_gain*point_to_plane_derror);
   }
   std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::line_to_line_VFI(const robot_to_workspace_VFI_definition &vfi){
       MatrixXd line_to_line_jacobian;
@@ -459,7 +472,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
       else throw std::runtime_error("Zone of VFI not defined");
 
-      return std::make_tuple(line_to_line_jacobian, line_to_line_derror);
+      return std::make_tuple(line_to_line_jacobian, vfi.vfi_gain*line_to_line_derror);
   }
   std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::line_to_point_VFI(const robot_to_workspace_VFI_definition &vfi){
       MatrixXd line_to_point_jacobian;
@@ -496,7 +509,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
       else throw std::runtime_error("Zone of VFI not defined");
 
-      return std::make_tuple(line_to_point_jacobian, line_to_point_derror);
+      return std::make_tuple(line_to_point_jacobian, vfi.vfi_gain*line_to_point_derror);
   }
 
   std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::plane_to_point_VFI(const robot_to_workspace_VFI_definition &vfi){
@@ -535,14 +548,18 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
       else throw std::runtime_error("Zone of VFI not defined");
 
-      return std::make_tuple(plane_to_point_jacobian, plane_to_point_derror);
+      return std::make_tuple(plane_to_point_jacobian, vfi.vfi_gain*plane_to_point_derror);
   }
 
   std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::line_to_line_angle_VFI(const robot_to_workspace_VFI_definition &vfi){
       MatrixXd line_to_line_angle_jacobian;
       VectorXd line_to_line_angle_derror = VectorXd(1);
       auto robot_ptr = vfi.robot;
-      auto robot_index = vfi.joint_index;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
       auto q = vfi.joint_angles;
       auto workspace_line = vfi.workspace_primitive;
 
@@ -575,6 +592,17 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
       else throw std::runtime_error("Zone of VFI not defined");
 
-      return std::make_tuple(line_to_line_angle_jacobian, line_to_line_angle_derror);
+      return std::make_tuple(line_to_line_angle_jacobian, vfi.vfi_gain*line_to_line_angle_derror);
+  }
+
+  MatrixXd DQ_VFIConstraintManager::_make_matrix_compatible_size(const MatrixXd& A) {
+      if(A.cols()!=dim_configuration_)
+      {
+
+          MatrixXd J_extended(A.rows(), dim_configuration_);
+          J_extended << A, MatrixXd::Zero(A.rows(),(dim_configuration_-A.cols()));
+          return J_extended;
+      }
+      else return A;
   }
 }

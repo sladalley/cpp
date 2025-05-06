@@ -62,9 +62,10 @@ struct robot_to_workspace_VFI_definition
     int joint_index = -1;
     VectorXd joint_angles = VectorXd::Zero(0);
     DQ workspace_primitive = DQ(0);
-    DQ line_plane_normal = k_;
+    DQ line_plane_normal = -k_;
     Direction direction = Direction::NoZone;
     double safe_distance = 0.0;
+    double vfi_gain = 1;
 
     robot_to_workspace_VFI_definition() = default;
 
@@ -77,7 +78,8 @@ struct robot_to_workspace_VFI_definition
         const DQ& workspace_primitive,
         double safe_distance,
         Direction direction,
-        const DQ& line_plane_normal = k_
+        double vfi_gain,
+        const DQ& line_plane_normal
 
     )
         : robot_type(robot_type),
@@ -88,6 +90,7 @@ struct robot_to_workspace_VFI_definition
           workspace_primitive(workspace_primitive),
           line_plane_normal(line_plane_normal),
           direction(direction),
+          vfi_gain(vfi_gain),
           safe_distance(safe_distance)
     {}
 
@@ -113,7 +116,7 @@ protected:
     MatrixXd _raw_add_matrix_constraint(const MatrixXd& A0, const MatrixXd& A);
     VectorXd _raw_add_vector_constraint(const VectorXd& b0, const VectorXd& b);
     void _check_matrix_and_vector_sizes(const MatrixXd& A, const VectorXd& b);
-    MatrixXd _make_matrix_compatible_size(const MatrixXd& A, const int& dim);
+    MatrixXd _make_matrix_compatible_size(const MatrixXd& A);
 
     void _check_vectors_size(const VectorXd& q1, const VectorXd& q2, const std::string &msg);
     void _check_vector_initialization(const VectorXd& q, const std::string &msg);
