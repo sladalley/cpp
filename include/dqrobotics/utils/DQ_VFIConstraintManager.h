@@ -25,6 +25,7 @@
 #include <tuple>
 #include <memory>
 #include <vector>
+#include <algorithm>
 #include <dqrobotics/DQ.h>
 #include <dqrobotics/robot_modeling/DQ_Kinematics.h>
 #include <dqrobotics/utils/DQ_Geometry.h>
@@ -128,13 +129,9 @@ protected:
     std::tuple<MatrixXd, VectorXd> point_to_point_VFI(const robot_to_workspace_VFI_definition& vfi_);
     std::tuple<MatrixXd, VectorXd> point_to_line_VFI(const robot_to_workspace_VFI_definition& vfi_);
     std::tuple<MatrixXd, VectorXd> point_to_plane_VFI(const robot_to_workspace_VFI_definition& vfi_);
-
     std::tuple<MatrixXd, VectorXd> line_to_line_VFI(const robot_to_workspace_VFI_definition& vfi_);
-
     std::tuple<MatrixXd, VectorXd> line_to_point_VFI(const robot_to_workspace_VFI_definition& vfi_);
-
     std::tuple<MatrixXd, VectorXd> plane_to_point_VFI(const robot_to_workspace_VFI_definition& vfi_);
-
     std::tuple<MatrixXd, VectorXd> line_to_line_angle_VFI(const robot_to_workspace_VFI_definition& vfi_);
 
 
@@ -159,7 +156,7 @@ public:
 
     void compute_robot_to_robot_constraint();
     void compute_robot_to_workspace_constraint();
-    void compute_joint_velocity_constraint();
+    void compute_joint_velocity_constraint(const VectorXd& theta, const double& k, const double& gamma);
 
 
 

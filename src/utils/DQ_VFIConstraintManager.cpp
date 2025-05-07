@@ -428,7 +428,6 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
 
       auto zone = vfi.direction;
       auto d_safe = vfi.safe_distance;
-
       DQ x = robot_ptr->fkm(q,robot_index);
       auto Jx = robot_ptr->pose_jacobian(q, robot_index);
       DQ robot_point = translation(x);
@@ -647,4 +646,34 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       }
         else return temp;
     }
+
+  void DQ_VFIConstraintManager::compute_joint_velocity_constraint(const VectorXd &theta, const double &k, const double &gamma)
+  {   MatrixXd identity = MatrixXd::Identity(dim_configuration_,dim_configuration_);
+      VectorXd q_min_constraint(dim_configuration_);
+      VectorXd q_max_constraint(dim_configuration_);
+      if((q_min_.size() != dim_configuration_)||(q_max_.size() != dim_configuration_))
+      {
+          throw std::runtime_error("Check position bounds are set");
+      }
+      if((q_dot_min_.size() != dim_configuration_)||(q_dot_max_.size() != dim_configuration_))
+      {
+          throw std::runtime_error("Check velocity bounds are set");
+      }
+      if (k<=0)
+      {
+        throw std::runtime_error("k needs to be bigger than 0");
+      }
+      if ((gamma>1) || (gamma<0))
+      {
+         throw std::runtime_error("gamma needs to be in the range of 0 << gamma <=1");
+      }
+      for (int i=0;i<dim_configuration_; i++)
+      {
+      q_min_constraint(i) = std::max(q_dot_min_(i), k*(gamma*q_min_(i)-theta(i)));
+      q_max_constraint(i) = std::min(q_dot_max_(i), k*(gamma*q_max_(i)-theta(i)));
+      }
+      add_inequality_constraint(-identity,-q_min_constraint);
+      add_inequality_constraint(identity,q_max_constraint);
+  }
 }
+
