@@ -215,6 +215,22 @@ void DQ_VFIConstraintManager::compute_robot_to_workspace_constraint()
             constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
+        else if((vfi.robot_type == PrimitiveType::Point) && (vfi.workspace_type == PrimitiveType::Cone)){
+            //function to calculate things for point_to_cone_flag for cone
+            std::cout<<""<<robot_to_workspace_vfis_.at(i).used<<std::endl;
+            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_h<<std::endl;
+            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_phi<<std::endl;
+            if(robot_to_workspace_vfis_.at(i).used == false ){
+                std::tie(robot_to_workspace_vfis_.at(i).cone_h,robot_to_workspace_vfis_.at(i).cone_phi) = _compute_point_to_cone_values(robot_to_workspace_vfis_.at(i));
+                robot_to_workspace_vfis_.at(i).used = true;
+             }
+            std::cout<<""<<robot_to_workspace_vfis_.at(i).used<<std::endl;
+            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_h<<std::endl;
+            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_phi<<std::endl;
+            std::tie(constraint_jacobian, constraint_derror) = point_to_cone_VFI(robot_to_workspace_vfis_.at(i));
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, robot_to_workspace_vfis_.at(i));
+            add_inequality_constraint(constraint_jacobian, constraint_derror);
+        }
         else throw std::runtime_error("VFI Primitive is not compatible");
 
 
@@ -618,6 +634,52 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
 
       return std::make_tuple(line_to_line_angle_jacobian, vfi.vfi_gain*line_to_line_angle_derror);
   }
+  std::tuple<MatrixXd, VectorXd> DQ_VFIConstraintManager::point_to_cone_VFI(const robot_to_workspace_VFI_definition &vfi){
+      MatrixXd point_to_cone_jacobian;
+      VectorXd point_to_cone_derror = VectorXd(1);
+      auto robot_ptr = vfi.robot;
+      int robot_index;
+      if (vfi.joint_index == -1){
+      robot_index = (robot_ptr->get_dim_configuration_space())-1;
+      }
+      else robot_index = vfi.joint_index;
+      auto q = vfi.joint_angles;
+      auto workspace_line = vfi.workspace_primitive;
+      auto workspace_plane = vfi.workspace_primitive_2;
+
+
+
+
+      if(!is_line(workspace_line)){
+          throw std::runtime_error("Workspace primitive is not a line");
+      }
+
+      if(!is_plane(workspace_plane)){
+          throw std::runtime_error("Workspace primitive is not a plane");
+      }
+
+
+      DQ x = robot_ptr->fkm(q,robot_index);
+      auto Jx = robot_ptr->pose_jacobian(q, robot_index);
+      DQ robot_point = translation(x);
+
+      auto H_t = vfi.cone_h + DQ_Geometry::point_to_plane_distance(robot_point, workspace_plane);
+      auto R_t = (H_t*vfi.cone_phi)*(H_t*vfi.cone_phi);
+      auto D_t = DQ_Geometry::point_to_line_squared_distance(robot_point, workspace_line);
+
+
+
+      auto Jt = DQ_Kinematics::translation_jacobian(Jx,x);
+      auto Jpl = DQ_Kinematics::point_to_line_distance_jacobian(Jt, robot_point, workspace_line);
+      auto Jpplane = DQ_Kinematics::point_to_plane_distance_jacobian(Jt, robot_point, workspace_plane);
+
+
+      point_to_cone_jacobian = Jpl - (2*(H_t)*vfi.cone_phi*vfi.cone_phi*Jpplane);
+
+      point_to_cone_derror << R_t - D_t;
+
+      return std::make_tuple(point_to_cone_jacobian, vfi.vfi_gain*point_to_cone_derror);
+  }
 
   MatrixXd DQ_VFIConstraintManager::_make_matrix_compatible_size(const MatrixXd& A, const robot_to_workspace_VFI_definition &vfi) {
       auto robot_index = vfi.robot_index;
@@ -675,5 +737,30 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       add_inequality_constraint(-identity,-q_min_constraint);
       add_inequality_constraint(identity,q_max_constraint);
   }
+
+     std::tuple<double, double> DQ_VFIConstraintManager::_compute_point_to_cone_values(const robot_to_workspace_VFI_definition& vfi)
+     {
+         auto robot_ptr = vfi.robot;
+         int robot_index;
+         if (vfi.joint_index == -1){
+         robot_index = (robot_ptr->get_dim_configuration_space())-1;
+         }
+         else robot_index = vfi.joint_index;
+         auto q = vfi.joint_angles;
+         auto workspace_line = vfi.workspace_primitive;
+         auto workspace_plane = vfi.workspace_primitive_2;
+         auto d_safe = vfi.safe_distance;
+
+         DQ x = robot_ptr->fkm(q,robot_index);
+         auto Jx = robot_ptr->pose_jacobian(q, robot_index);
+         DQ robot_point = translation(x);
+
+         auto hc_0 = DQ_Geometry::point_to_plane_distance(robot_point, workspace_plane); // initial distance between end-effector and plane,
+         auto R_0 = sqrt(DQ_Geometry::point_to_line_squared_distance(robot_point, workspace_line));// initial distance betwee  end-effector and line
+         auto h = (d_safe*hc_0)/R_0 -d_safe; //calculated only once
+         auto tan_phi = R_0/(hc_0+h); //calculated only once
+
+         return(std::make_tuple(h,tan_phi));
+     }
 }
 

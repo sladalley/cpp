@@ -51,6 +51,7 @@ enum class PrimitiveType
     Line,
     Point,
     Plane,
+    Cone,
     LineAngle
 };
 
@@ -63,10 +64,14 @@ struct robot_to_workspace_VFI_definition
     int robot_index = 0;
     VectorXd joint_angles = VectorXd::Zero(0);
     DQ workspace_primitive = DQ(0);
+    DQ workspace_primitive_2 = DQ(0);
     DQ line_plane_normal = -k_;
     Direction direction = Direction::None;
     double safe_distance = 0.0;
     double vfi_gain = 1;
+    bool used = false;
+    double cone_h = 0.0;
+    double cone_phi = 0.0;
 
     robot_to_workspace_VFI_definition() = default;
 
@@ -81,7 +86,12 @@ struct robot_to_workspace_VFI_definition
         double safe_distance,
         Direction direction,
         double vfi_gain,
-        const DQ& line_plane_normal
+        const DQ& line_plane_normal,
+        const DQ& workspace_primitive_2,
+        bool used,
+        double cone_h,
+        double cone_phi
+
 
     )
         : robot_type(robot_type),
@@ -91,10 +101,15 @@ struct robot_to_workspace_VFI_definition
           robot_index(robot_index),
           joint_angles(joint_angles),
           workspace_primitive(workspace_primitive),
+          workspace_primitive_2(workspace_primitive_2),
           line_plane_normal(line_plane_normal),
           direction(direction),
           vfi_gain(vfi_gain),
-          safe_distance(safe_distance)
+          safe_distance(safe_distance),
+          used(used),
+          cone_h(cone_h),
+          cone_phi(cone_phi)
+
     {}
 
 };
@@ -115,7 +130,7 @@ protected:
     MatrixXd inequality_constraint_matrix_ = MatrixXd::Zero(0,0);
     VectorXd inequality_constraint_vector_ = VectorXd::Zero(0);
 
-    std::vector<robot_to_workspace_VFI_definition> robot_to_workspace_vfis_;
+    std::vector<robot_to_workspace_VFI_definition>& robot_to_workspace_vfis_;
 
     MatrixXd _raw_add_matrix_constraint(const MatrixXd& A0, const MatrixXd& A);
     VectorXd _raw_add_vector_constraint(const VectorXd& b0, const VectorXd& b);
@@ -125,6 +140,7 @@ protected:
     void _check_vectors_size(const VectorXd& q1, const VectorXd& q2, const std::string &msg);
     void _check_vector_initialization(const VectorXd& q, const std::string &msg);
     MatrixXd _create_matrix(const MatrixXd& A);
+    std::tuple<double, double> _compute_point_to_cone_values(const robot_to_workspace_VFI_definition& vfi_);
 
     std::tuple<MatrixXd, VectorXd> point_to_point_VFI(const robot_to_workspace_VFI_definition& vfi_);
     std::tuple<MatrixXd, VectorXd> point_to_line_VFI(const robot_to_workspace_VFI_definition& vfi_);
@@ -133,6 +149,7 @@ protected:
     std::tuple<MatrixXd, VectorXd> line_to_point_VFI(const robot_to_workspace_VFI_definition& vfi_);
     std::tuple<MatrixXd, VectorXd> plane_to_point_VFI(const robot_to_workspace_VFI_definition& vfi_);
     std::tuple<MatrixXd, VectorXd> line_to_line_angle_VFI(const robot_to_workspace_VFI_definition& vfi_);
+    std::tuple<MatrixXd, VectorXd> point_to_cone_VFI(const robot_to_workspace_VFI_definition& vfi_);
 
 
 public:
