@@ -217,18 +217,8 @@ void DQ_VFIConstraintManager::compute_robot_to_workspace_constraint()
         }
         else if((vfi.robot_type == PrimitiveType::Point) && (vfi.workspace_type == PrimitiveType::Cone)){
             //function to calculate things for point_to_cone_flag for cone
-            std::cout<<""<<robot_to_workspace_vfis_.at(i).used<<std::endl;
-            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_h<<std::endl;
-            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_phi<<std::endl;
-            if(robot_to_workspace_vfis_.at(i).used == false ){
-                std::tie(robot_to_workspace_vfis_.at(i).cone_h,robot_to_workspace_vfis_.at(i).cone_phi) = _compute_point_to_cone_values(robot_to_workspace_vfis_.at(i));
-                robot_to_workspace_vfis_.at(i).used = true;
-             }
-            std::cout<<""<<robot_to_workspace_vfis_.at(i).used<<std::endl;
-            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_h<<std::endl;
-            std::cout<<""<<robot_to_workspace_vfis_.at(i).cone_phi<<std::endl;
-            std::tie(constraint_jacobian, constraint_derror) = point_to_cone_VFI(robot_to_workspace_vfis_.at(i));
-            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, robot_to_workspace_vfis_.at(i));
+            std::tie(constraint_jacobian, constraint_derror) = point_to_cone_VFI(vfi);
+            constraint_jacobian = _make_matrix_compatible_size(constraint_jacobian, vfi);
             add_inequality_constraint(constraint_jacobian, constraint_derror);
         }
         else throw std::runtime_error("VFI Primitive is not compatible");
@@ -738,7 +728,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       add_inequality_constraint(identity,q_max_constraint);
   }
 
-     std::tuple<double, double> DQ_VFIConstraintManager::_compute_point_to_cone_values(const robot_to_workspace_VFI_definition& vfi)
+     std::tuple<double, double> DQ_VFIConstraintManager::compute_point_to_cone_values(const robot_to_workspace_VFI_definition& vfi)
      {
          auto robot_ptr = vfi.robot;
          int robot_index;
@@ -759,6 +749,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
          auto R_0 = sqrt(DQ_Geometry::point_to_line_squared_distance(robot_point, workspace_line));// initial distance betwee  end-effector and line
          auto h = (d_safe*hc_0)/R_0 -d_safe; //calculated only once
          auto tan_phi = R_0/(hc_0+h); //calculated only once
+
 
          return(std::make_tuple(h,tan_phi));
      }

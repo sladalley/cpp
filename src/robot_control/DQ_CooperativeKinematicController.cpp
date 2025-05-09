@@ -29,7 +29,7 @@ DQ_CooperativeKinematicController::DQ_CooperativeKinematicController():
     control_objectives_({CooperativeControlObjective::None}), //change to initialisation of empty vector
     control_frames_({CooperativeControlFrame::None}), //change to initialisipn of empty vector
     attached_primitive_(0.0),
-    target_primitive_(0.0),
+    target_primitive_({DQ(0)}),
     gain_(0.0),
     damping_(0),//Todo: change this inialization to use empty vector
     system_reached_stable_region_(false),//Todo: change this inialization to use empty vector
@@ -118,13 +118,13 @@ MatrixXd DQ_CooperativeKinematicController::get_jacobian(const VectorXd &q) cons
 
         case CooperativeControlObjective::DistanceToPlane:
         {
-            if(!is_plane(target_primitive_))
+            if(!is_plane(target_primitive_.at(i)))
             {
                 throw std::runtime_error("Please set the target plane with the method set_target_primitive()");
             }
             MatrixXd Jt = DQ_Kinematics::translation_jacobian(J_pose, x_pose);
             DQ t = translation(x_pose);
-            task_jacobian = DQ_Kinematics::point_to_plane_distance_jacobian(Jt, t, target_primitive_);
+            task_jacobian = DQ_Kinematics::point_to_plane_distance_jacobian(Jt, t, target_primitive_.at(i));
             break;
         }
 
@@ -215,13 +215,13 @@ VectorXd DQ_CooperativeKinematicController::get_task_variable(const VectorXd &q)
 
         case CooperativeControlObjective::DistanceToPlane:
         {
-            if(!is_plane(target_primitive_))
+            if(!is_plane(target_primitive_.at(i)))
             {
                 throw std::runtime_error("Set the target plane with the method set_target_primitive()");
             }
             DQ t = translation(x_pose);
             VectorXd distance(1);
-            distance(0)=DQ_Geometry::point_to_plane_distance(t, target_primitive_);
+            distance(0)=DQ_Geometry::point_to_plane_distance(t, target_primitive_.at(i));
             task_variable = distance;
             break;
         }
@@ -338,7 +338,7 @@ void DQ_CooperativeKinematicController::set_primitive_to_effector(const DQ &prim
     attached_primitive_ = primitive;
 }
 
-void DQ_CooperativeKinematicController::set_target_primitive(const DQ &primitive)
+void DQ_CooperativeKinematicController::set_target_primitive(const std::vector<DQ >&primitive)
 {
     target_primitive_ = primitive;
 }

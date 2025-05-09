@@ -130,7 +130,7 @@ protected:
     MatrixXd inequality_constraint_matrix_ = MatrixXd::Zero(0,0);
     VectorXd inequality_constraint_vector_ = VectorXd::Zero(0);
 
-    std::vector<robot_to_workspace_VFI_definition>& robot_to_workspace_vfis_;
+    std::vector<robot_to_workspace_VFI_definition> robot_to_workspace_vfis_;
 
     MatrixXd _raw_add_matrix_constraint(const MatrixXd& A0, const MatrixXd& A);
     VectorXd _raw_add_vector_constraint(const VectorXd& b0, const VectorXd& b);
@@ -140,7 +140,6 @@ protected:
     void _check_vectors_size(const VectorXd& q1, const VectorXd& q2, const std::string &msg);
     void _check_vector_initialization(const VectorXd& q, const std::string &msg);
     MatrixXd _create_matrix(const MatrixXd& A);
-    std::tuple<double, double> _compute_point_to_cone_values(const robot_to_workspace_VFI_definition& vfi_);
 
     std::tuple<MatrixXd, VectorXd> point_to_point_VFI(const robot_to_workspace_VFI_definition& vfi_);
     std::tuple<MatrixXd, VectorXd> point_to_line_VFI(const robot_to_workspace_VFI_definition& vfi_);
@@ -174,6 +173,7 @@ public:
     void compute_robot_to_robot_constraint();
     void compute_robot_to_workspace_constraint();
     void compute_joint_velocity_constraint(const VectorXd& theta, const double& k, const double& gamma);
+    std::tuple<double, double> compute_point_to_cone_values(const robot_to_workspace_VFI_definition& vfi_);
 
 
 

@@ -41,7 +41,7 @@ protected:
     std::vector<CooperativeControlObjective> control_objectives_;
     std::vector<CooperativeControlFrame> control_frames_;
     DQ attached_primitive_;
-    DQ target_primitive_;
+    std::vector<DQ> target_primitive_;
 
     double gain_;
     double damping_;
@@ -86,7 +86,7 @@ public:
 
     void set_primitive_to_effector(const DQ& primitive);
 
-    void set_target_primitive(const DQ& primitive);
+    void set_target_primitive(const std::vector<DQ>& primitive);
 
     void set_stability_counter_max(const int& max);
 
