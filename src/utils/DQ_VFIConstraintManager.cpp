@@ -703,6 +703,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
   {   MatrixXd identity = MatrixXd::Identity(dim_configuration_,dim_configuration_);
       VectorXd q_min_constraint(dim_configuration_);
       VectorXd q_max_constraint(dim_configuration_);
+      VectorXd theta_clamped(dim_configuration_);
       if((q_min_.size() != dim_configuration_)||(q_max_.size() != dim_configuration_))
       {
           throw std::runtime_error("Check position bounds are set");
@@ -719,10 +720,17 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       {
          throw std::runtime_error("gamma needs to be in the range of 0 << gamma <=1");
       }
+      for (int i = 0; i < dim_configuration_; ++i) {
+          if (theta(i) < gamma*q_min_(i) || theta(i) > gamma*q_max_(i)) {
+              std::cerr << "Warning: theta(" << i << ") = " << theta(i)
+                        << " is out of bounds [" << gamma*q_min_(i) << ", " << gamma*q_max_(i) << "] and will be clamped.\n";
+          }
+          theta_clamped(i) = std::min(std::max(theta(i), gamma*q_min_(i)), gamma*q_max_(i));
+      }
       for (int i=0;i<dim_configuration_; i++)
       {
-      q_min_constraint(i) = std::max(q_dot_min_(i), k*(gamma*q_min_(i)-theta(i)));
-      q_max_constraint(i) = std::min(q_dot_max_(i), k*(gamma*q_max_(i)-theta(i)));
+      q_min_constraint(i) = std::max(q_dot_min_(i), k*(gamma*q_min_(i)-theta_clamped(i)));
+      q_max_constraint(i) = std::min(q_dot_max_(i), k*(gamma*q_max_(i)-theta_clamped(i)));
       }
       add_inequality_constraint(-identity,-q_min_constraint);
       add_inequality_constraint(identity,q_max_constraint);
