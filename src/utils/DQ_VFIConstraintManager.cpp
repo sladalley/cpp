@@ -732,6 +732,7 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       q_min_constraint(i) = std::max(q_dot_min_(i), k*(gamma*q_min_(i)-theta_clamped(i)));
       q_max_constraint(i) = std::min(q_dot_max_(i), k*(gamma*q_max_(i)-theta_clamped(i)));
       }
+
       add_inequality_constraint(-identity,-q_min_constraint);
       add_inequality_constraint(identity,q_max_constraint);
   }
