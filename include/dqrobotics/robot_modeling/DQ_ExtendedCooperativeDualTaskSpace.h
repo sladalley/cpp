@@ -44,6 +44,8 @@ public:
     MatrixXd relative_pose_jacobian(const VectorXd& theta) override;
     MatrixXd absolute_pose_jacobian(const VectorXd& theta) override;
 
+    MatrixXd absolute_alpha_pose_jacobian(const VectorXd& theta);
+
 };
 
 
