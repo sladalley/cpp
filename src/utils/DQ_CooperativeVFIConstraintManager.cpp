@@ -69,12 +69,13 @@ std::tuple<MatrixXd, VectorXd> DQ_CooperativeVFIConstraintManager::cooperative_l
     else throw std::runtime_error("Check vfi_frame is set correctly");
 
     DQ line_normal = vfi.line_plane_normal;
-    DQ cooperative_frame_line = (x.P())*(line_normal)*(x.P().conj());
+    DQ cooperative_frame_line = Ad(x.P(),line_normal);
     auto Jline = DQ_Kinematics::line_jacobian(Jx,x, line_normal);
 
     auto J = DQ_Kinematics::line_to_line_angle_jacobian(Jline,line_normal, workspace_line);
 
     double phi = DQ_Geometry::line_to_line_angle(cooperative_frame_line, workspace_line);
+     std::cout << "angle: " << phi*180/(3.1415926) << std::endl;
     double f = 2-2*cos(phi);
     double fsafe = 2-2*cos(d_safe);
 
@@ -90,5 +91,11 @@ std::tuple<MatrixXd, VectorXd> DQ_CooperativeVFIConstraintManager::cooperative_l
 
     return std::make_tuple(line_to_line_angle_jacobian, vfi.vfi_gain*line_to_line_angle_derror);
 }
+
+void DQ_CooperativeVFIConstraintManager::set_cooperative_vfi(const std::vector<cooperative_VFI_definition> &cooperative_vfis)
+{
+  cooperative_vfis_= cooperative_vfis;
+}
+
 
 }
