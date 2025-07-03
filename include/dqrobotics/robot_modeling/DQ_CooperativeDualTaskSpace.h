@@ -49,13 +49,13 @@ public:
     DQ_CooperativeDualTaskSpace(DQ_Kinematics* robot1, DQ_Kinematics* robot2);
     DQ_CooperativeDualTaskSpace(const std::shared_ptr<DQ_Kinematics>& robot1, const std::shared_ptr<DQ_Kinematics>& robot2);
 
-    DQ pose1(const VectorXd& theta);
-    DQ pose2(const VectorXd& theta);
+    virtual DQ pose1(const VectorXd& theta);
+    virtual DQ pose2(const VectorXd& theta);
 
-    MatrixXd pose_jacobian1(const VectorXd& theta);
-    MatrixXd pose_jacobian2(const VectorXd& theta);
+    virtual MatrixXd pose_jacobian1(const VectorXd& theta);
+    virtual MatrixXd pose_jacobian2(const VectorXd& theta);
 
-    int get_configuration_space();
+    virtual int get_configuration_space();
 
     virtual DQ relative_pose(const VectorXd& theta);
     virtual DQ absolute_pose(const VectorXd& theta);

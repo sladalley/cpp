@@ -68,6 +68,7 @@ protected:
     std::vector<cooperative_VFI_definition> cooperative_vfis_;
 
     std::tuple<MatrixXd, VectorXd> cooperative_line_to_line_angle_VFI(const cooperative_VFI_definition& vfi_);
+    std::tuple<MatrixXd, VectorXd> cooperative_point_to_point_VFI(const cooperative_VFI_definition& vfi_);
 
 
 public:

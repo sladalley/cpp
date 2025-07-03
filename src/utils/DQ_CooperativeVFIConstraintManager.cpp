@@ -26,18 +26,27 @@ void DQ_CooperativeVFIConstraintManager::compute_cooperative_constraints()
                 if((vfi.cooperative_type == PrimitiveType::LineAngle) && (vfi.workspace_type == PrimitiveType::LineAngle)){
                             std::tie(constraint_jacobian, constraint_derror) = cooperative_line_to_line_angle_VFI(vfi);
                             add_inequality_constraint(constraint_jacobian, constraint_derror);
-                        }
+                }
+                else if((vfi.cooperative_type == PrimitiveType::Point) && (vfi.workspace_type == PrimitiveType::Point)){
+                            std::tie(constraint_jacobian, constraint_derror) = cooperative_point_to_point_VFI(vfi);
+                            add_inequality_constraint(constraint_jacobian, constraint_derror);
 
-                else throw std::runtime_error("Not defined");
+
+
+                }
+
+                else throw std::runtime_error("Cooperative Constraint Not defined  for Absolute  Pose");
+                break;
 
             case CooperativeVFIFrame::RelativeFrame:
             //pose_constraint
             //position_constraint
-            if((vfi.cooperative_type == PrimitiveType::LineAngle) && (vfi.workspace_type == PrimitiveType::LineAngle)){
-                        std::tie(constraint_jacobian, constraint_derror) = cooperative_line_to_line_angle_VFI(vfi);
-                        add_inequality_constraint(constraint_jacobian, constraint_derror);
-                    }
-                 else throw std::runtime_error("TNot defined");
+                if((vfi.cooperative_type == PrimitiveType::LineAngle) && (vfi.workspace_type == PrimitiveType::LineAngle)){
+                            std::tie(constraint_jacobian, constraint_derror) = cooperative_line_to_line_angle_VFI(vfi);
+                            add_inequality_constraint(constraint_jacobian, constraint_derror);
+                }
+                else throw std::runtime_error("Cooperative Constraint Not defined  for Relative Pose");
+                break;
 
         }
     }
@@ -90,6 +99,51 @@ std::tuple<MatrixXd, VectorXd> DQ_CooperativeVFIConstraintManager::cooperative_l
     else throw std::runtime_error("Zone of VFI not defined");
 
     return std::make_tuple(line_to_line_angle_jacobian, vfi.vfi_gain*line_to_line_angle_derror);
+}
+
+
+std::tuple<MatrixXd, VectorXd> DQ_CooperativeVFIConstraintManager::cooperative_point_to_point_VFI(const cooperative_VFI_definition &vfi) {
+    MatrixXd point_to_point_jacobian;
+    VectorXd point_to_point_derror = VectorXd(1);
+
+    auto cdts_ptr = vfi.cdts;
+    auto q = vfi.joint_angles;
+    auto workspace_point = vfi.workspace_primitive;
+
+    if(!is_pure_quaternion(workspace_point)){
+        throw std::runtime_error("Workspace primitive is not a point");
+    }
+
+    auto zone = vfi.direction;
+    auto d_safe = vfi.safe_distance;
+    DQ x;
+    MatrixXd Jx;
+
+    if (vfi.vfi_frame==CooperativeVFIFrame::AbsoluteFrame){
+    x = cdts_ptr->absolute_pose(q);
+    Jx = cdts_ptr->absolute_pose_jacobian(q);
+    }
+
+    else throw std::runtime_error("Check vfi_frame is set correctly");
+
+    DQ cooperative_point = translation(x);
+    auto Jt = DQ_Kinematics::translation_jacobian(Jx,x);
+
+    auto J = DQ_Kinematics::point_to_point_distance_jacobian(Jt, cooperative_point, workspace_point);
+
+
+    auto squared_distance = DQ_Geometry::point_to_point_squared_distance(cooperative_point, workspace_point);
+    if(zone == Direction::ForbiddenZone){
+        point_to_point_jacobian = -J;
+        point_to_point_derror << squared_distance - d_safe;
+    }
+    else if(zone == Direction::SafeZone){
+        point_to_point_jacobian = J;
+        point_to_point_derror <<  d_safe - squared_distance;
+
+    }
+    else throw std::runtime_error("Zone of VFI not defined");
+    return std::make_tuple(point_to_point_jacobian, vfi.vfi_gain*point_to_point_derror);
 }
 
 void DQ_CooperativeVFIConstraintManager::set_cooperative_vfi(const std::vector<cooperative_VFI_definition> &cooperative_vfis)

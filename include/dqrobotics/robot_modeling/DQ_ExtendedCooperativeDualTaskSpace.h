@@ -19,6 +19,7 @@ private:
 protected:
     double alpha_;
     bool beta_;
+    bool alphamode_;
 
 public:
     //Remove default constructor
@@ -29,9 +30,18 @@ public:
 
     void setAlpha(const double& alpha);
     double getAlpha();
+    void setAlphaMode(const bool& alphamode);
 
     void setBeta(const bool& beta);
     bool getBeta();
+
+    int get_configuration_space() override;
+
+    DQ pose1(const VectorXd& theta) override;
+    DQ pose2(const VectorXd& theta) override;
+
+    MatrixXd pose_jacobian1(const VectorXd& theta) override;
+    MatrixXd pose_jacobian2(const VectorXd& theta) override;
 
 
     DQ relative_pose(const VectorXd& theta) override;

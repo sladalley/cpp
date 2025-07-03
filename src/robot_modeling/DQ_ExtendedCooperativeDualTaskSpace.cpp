@@ -9,7 +9,8 @@ DQ_ExtendedCooperativeDualTaskSpace::DQ_ExtendedCooperativeDualTaskSpace(const s
     robot1_(robot1),
     robot2_(robot2),
     alpha_(0.5),
-    beta_(true)
+    beta_(true),
+    alphamode_(false)
 {
 
 }
@@ -36,8 +37,34 @@ void DQ_ExtendedCooperativeDualTaskSpace::setBeta (const bool &beta) {
     beta_ = beta;
 }
 
+void DQ_ExtendedCooperativeDualTaskSpace::setAlphaMode(const bool &alphamode) {
+    alphamode_ = alphamode;
+}
+
+
 bool DQ_ExtendedCooperativeDualTaskSpace::getBeta () {
     return beta_;
+}
+
+DQ DQ_ExtendedCooperativeDualTaskSpace::pose1(const VectorXd &theta)
+{
+
+    return _get_robot1_ptr()->fkm(theta.head(_get_robot1_ptr()->get_dim_configuration_space()));
+}
+
+DQ DQ_ExtendedCooperativeDualTaskSpace::pose2(const VectorXd &theta)
+{
+    return _get_robot2_ptr()->fkm(theta.segment(_get_robot1_ptr()->get_dim_configuration_space(),_get_robot2_ptr()->get_dim_configuration_space()));
+}
+
+MatrixXd DQ_ExtendedCooperativeDualTaskSpace::pose_jacobian1(const VectorXd &theta)
+{
+    return _get_robot1_ptr()->pose_jacobian(theta.head(_get_robot1_ptr()->get_dim_configuration_space()));
+}
+
+MatrixXd DQ_ExtendedCooperativeDualTaskSpace::pose_jacobian2(const VectorXd &theta)
+{
+    return _get_robot2_ptr()->pose_jacobian(theta.segment(_get_robot1_ptr()->get_dim_configuration_space(),_get_robot2_ptr()->get_dim_configuration_space()));
 }
 
 DQ DQ_ExtendedCooperativeDualTaskSpace::relative_pose(const VectorXd &theta)
@@ -48,6 +75,16 @@ DQ DQ_ExtendedCooperativeDualTaskSpace::relative_pose(const VectorXd &theta)
 DQ DQ_ExtendedCooperativeDualTaskSpace::absolute_pose(const VectorXd &theta)
 {
     return pose2(theta)*(pow(relative_pose(theta),(alpha_*beta_)));
+}
+
+int DQ_ExtendedCooperativeDualTaskSpace::get_configuration_space()
+{
+    if (alphamode_ == false){
+    return _get_robot1_ptr()->get_dim_configuration_space()+_get_robot2_ptr()->get_dim_configuration_space();
+    }
+    else {
+        return _get_robot1_ptr()->get_dim_configuration_space()+_get_robot2_ptr()->get_dim_configuration_space()+1;
+    }
 }
 /**
  * @brief DQ_ExtendedCooperativeDualTaskSpace::_relative_twist given in respect to inertial frame
@@ -87,11 +124,23 @@ MatrixXd DQ_ExtendedCooperativeDualTaskSpace::relative_pose_jacobian(const Vecto
     } else {
         Jxr << (hamiplus8(conj(x2)))*Jx1,haminus8(x1)*C8()*Jx2;
     }
+
+    if(alphamode_ ==false){
     return  Jxr;
+    }
+    else {
+        MatrixXd Jxr_extended(8,_get_robot1_ptr()->get_dim_configuration_space()+_get_robot2_ptr()->get_dim_configuration_space()+1);
+        Jxr_extended << (hamiplus8(conj(x2)))*Jx1,haminus8(x1)*C8()*Jx2, MatrixXd::Zero(8,1);
+        return Jxr_extended;
+    }
+
 }
 
 MatrixXd DQ_ExtendedCooperativeDualTaskSpace::absolute_pose_jacobian(const VectorXd &theta)
 {
+    if (alphamode_  == true){
+    return absolute_alpha_pose_jacobian(theta);
+    }
     //Preliminaries
     const MatrixXd Jx2 = pose_jacobian2(theta);
     const DQ       x2  = pose2(theta);
@@ -117,6 +166,7 @@ MatrixXd DQ_ExtendedCooperativeDualTaskSpace::absolute_pose_jacobian(const Vecto
     } else {
         Jxa << haminus8(pow(xr, alpha_))*temp +hamiplus8(x2)*Jxr2;
     }
+
 
     return Jxa;
 }

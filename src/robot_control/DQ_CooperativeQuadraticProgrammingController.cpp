@@ -47,6 +47,7 @@ VectorXd DQ_CooperativeQuadraticProgrammingController::compute_tracking_control_
 
         const MatrixXd J = get_jacobian(q);
 
+
         if(task_variable.size() != task_reference.size())
             throw std::runtime_error("Incompatible sizes between task variable and task reference in compute_tracking_control_signal");
 
@@ -64,6 +65,7 @@ VectorXd DQ_CooperativeQuadraticProgrammingController::compute_tracking_control_
 
         const MatrixXd H = compute_objective_function_symmetric_matrix(J,task_error - (1.0/gain_)*feed_forward);
         const MatrixXd f = compute_objective_function_linear_component(J,task_error - (1.0/gain_)*feed_forward);
+
 
         VectorXd u = qp_solver_sptr_->solve_quadratic_program(H,f,A,b,Aeq,beq);
 
