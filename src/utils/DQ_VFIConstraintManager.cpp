@@ -518,12 +518,13 @@ void DQ_VFIConstraintManager::set_joint_velocity_limits(const VectorXd& q_dot_lo
       DQ x = robot_ptr->fkm(q,robot_index);
       auto Jx = robot_ptr->pose_jacobian(q, robot_index);
       DQ line_normal = vfi.line_plane_normal;
-      DQ robot_line = (x.P())*(line_normal)*(x.P().conj());
+      DQ robot_line_normal = Ad(x.P(),line_normal);
+      DQ robot_line = robot_line_normal + E_*cross(translation(x), robot_line_normal);
       auto Jline = DQ_Kinematics::line_jacobian(Jx,x, line_normal);
 
       auto J = DQ_Kinematics::line_to_point_distance_jacobian(Jline, robot_line, workspace_point);
 
-      auto squared_distance = DQ_Geometry::point_to_line_squared_distance(robot_line, workspace_point);
+      auto squared_distance = DQ_Geometry::point_to_line_squared_distance(workspace_point, robot_line);
 
       if(zone == Direction::ForbiddenZone){
           line_to_point_jacobian = -J;
